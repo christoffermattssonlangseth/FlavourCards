@@ -1,0 +1,22 @@
+{
+ "33032": "C(CC(=O)O)[C@@H](C(=O)O)N",
+ "5988": "C([C@@H]1[C@H]([C@@H]([C@H]([C@H](O1)O[C@]2([C@H]([C@@H]([C@H](O2)CO)O)O)CO)O)O)O)O",
+ "311": "C(C(=O)O)C(CC(=O)O)(C(=O)O)O",
+ "5234": "[Na+].[Cl-]",
+ "3034034": "COC1=CC2=C(C=CN=C2C=C1)[C@H]([C@@H]3C[C@@H]4CCN3C[C@@H]4C=C)O",
+ "2519": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
+ "676454": "C1=CC=C(C=C1)NC(=S)N",
+ "14982": "C[C@]12CC[C@](C[C@H]1C3=CC(=O)[C@@H]4[C@]5(CC[C@@H](C([C@@H]5CC[C@]4([C@@]3(CC2)C)C)(C)C)O[C@@H]6[C@@H]([C@H]([C@@H]([C@H](O6)C(=O)O)O)O)O[C@H]7[C@@H]([C@H]([C@@H]([C@H](O7)C(=O)O)O)O)O)C)(C)C(=O)O",
+ "1548943": "CC(C)/C=C/CCCCC(=O)NCC1=CC(=C(C=C1)O)OC",
+ "16666": "C[C@@H]1CC[C@H]([C@@H](C1)O)C(C)C",
+ "5971": "C=CCN=C=S",
+ "637511": "C1=CC=C(C=C1)/C=C/C=O",
+ "10084135": "C/C=C/C=C/C=C\\CC/C=C/C(=O)NCC(C)(C)O",
+ "638024": "C1CCN(CC1)C(=O)/C=C/C=C/C2=CC3=C(C=C2)OCO3",
+ "439570": "CC1=CC[C@H](CC1=O)C(=C)C",
+ "16724": "CC1=CC[C@@H](CC1=O)C(=C)C",
+ "1183": "COC1=C(C=CC(=C1)C=O)O",
+ "6852393": "C[C@]12CC[C@H]3[C@H]([C@@H]1CC=C2)CC[C@@H]4[C@@]3(CCC(=O)C4)C",
+ "5283345": "CCCCCCC/C=C/C=O",
+ "31276": "CC(C)CCOC(=O)C"
+}
