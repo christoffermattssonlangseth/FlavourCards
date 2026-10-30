@@ -1,6 +1,6 @@
 # Molecule ↔ Flavour matching cards
 
-20 pairs: a **molecule card** (structure, name and formula) and a **flavour card** (food picture, flavour and foods). Players match each molecule to its flavour.
+20 pairs: a **molecule card** (structure, name and formula) and a **flavour card** (food picture, flavour, foods and receptor). Players match each molecule to its flavour.
 
 ## Build
 
@@ -10,7 +10,7 @@ conda run -n flavourcards python make_cards.py               # output/cards.pdf
 conda run -n flavourcards python make_cards.py --hide-names  # output/cards_hard.pdf (structure + formula only)
 ```
 
-Edit `pairs.json` to swap pairs. You only need a PubChem CID; structures are fetched once and cached in `structures_cache.json`. The emoji are rendered with Apple Color Emoji, so the build needs macOS.
+Edit `pairs.json` to swap pairs. An optional `card_name` (e.g. the systematic name) replaces `name` on the molecule card, so obvious ones like caffeine aren't given away; the answer key shows both. You only need a PubChem CID; structures are fetched once and cached in `structures_cache.json`. The emoji are rendered with Apple Color Emoji, so the build needs macOS.
 
 ## Output
 

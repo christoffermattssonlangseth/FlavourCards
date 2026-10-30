@@ -150,29 +150,77 @@ FLAVOUR = ParagraphStyle("flavour", fontName="Avenir-Bold", fontSize=14.5, leadi
                          alignment=TA_CENTER, textColor=INK)
 FOODS = ParagraphStyle("foods", fontName="Avenir", fontSize=8.5, leading=10.5,
                        alignment=TA_CENTER, textColor=GREY)
+RECEPTOR = ParagraphStyle("receptor", fontName="Avenir-Demi", fontSize=8, leading=9.5,
+                          alignment=TA_CENTER, textColor=FLAV_COLOUR)
+
+
+def wrap_name(name, font, size, width):
+    """Greedy line-break a chemical name after spaces and hyphens."""
+    tokens = re.findall(r"[^\s-]*(?:-|\s+|$)", name)
+    lines, line = [], ""
+    for t in filter(None, tokens):
+        if line and pdfmetrics.stringWidth((line + t).rstrip(), font, size) > width:
+            lines.append(line.rstrip())
+            line = t.lstrip()
+        else:
+            line += t
+    return lines + [line.rstrip()]
+
+
+def fit_name(name, width, max_lines=3, max_size=11.5, min_size=6.5):
+    """Largest font size (and the wrapped lines) that fits the name in max_lines."""
+    size = max_size
+    while True:
+        lines = wrap_name(name, NAME.fontName, size, width)
+        fits = len(lines) <= max_lines and all(
+            pdfmetrics.stringWidth(l, NAME.fontName, size) <= width for l in lines)
+        if fits or size <= min_size:
+            return size, lines
+        size -= 0.25
 
 
 def molecule_card(c, x, y, pair, img, mol, hide_names):
     card_frame(c, x, y, MOL_COLOUR, "MOLECULE")
     pad = 4 * mm
-    text_h = 10 * mm if hide_names else 19 * mm
+    w = CARD_W - 2 * pad
+    # text block (name + formula) sits above the footer; the structure gets the rest
+    blocks = []
+    if not hide_names:
+        size, lines = fit_name(pair.get("card_name", pair["name"]), w)
+        style = ParagraphStyle("fitted", parent=NAME, fontSize=size, leading=size * 1.18)
+        blocks.append(Paragraph("<br/>".join(escape(l) for l in lines), style))
+    blocks.append(Paragraph(formula_markup(mol, pair["cid"]), FORMULA))
+    heights = [b.wrap(w, 100 * mm)[1] for b in blocks]
+    text_h = sum(heights) + 1 * mm * (len(blocks) - 1)
     box_top = y + CARD_H - BAND_H - 3 * mm
-    box_bottom = y + 6 * mm + text_h
-    draw_image_fit(c, img, x + pad, box_bottom, CARD_W - 2 * pad, box_top - box_bottom,
+    box_bottom = y + 7 * mm + text_h + 2 * mm
+    draw_image_fit(c, img, x + pad, box_bottom, w, box_top - box_bottom,
                    max_scale=MAX_BOND / BOND_PX)
     ty = box_bottom - 1 * mm
-    if not hide_names:
-        ty -= paragraph(c, escape(pair["name"]), NAME, x + pad, ty, CARD_W - 2 * pad) + 1 * mm
-    paragraph(c, formula_markup(mol, pair["cid"]), FORMULA, x + pad, ty, CARD_W - 2 * pad)
+    for b, h in zip(blocks, heights):
+        b.drawOn(c, x + pad, ty - h)
+        ty -= h + 1 * mm
 
 
 def flavour_card(c, x, y, pair, emoji):
     card_frame(c, x, y, FLAV_COLOUR, "FLAVOUR")
     pad = 4 * mm
-    draw_image_fit(c, emoji, x + pad, y + 40 * mm, CARD_W - 2 * pad, 30 * mm)
-    ty = y + 36 * mm
+    draw_image_fit(c, emoji, x + pad, y + 45 * mm, CARD_W - 2 * pad, 26 * mm)
+    ty = y + 41 * mm
     ty -= paragraph(c, escape(pair["flavour"]), FLAVOUR, x + pad, ty, CARD_W - 2 * pad) + 2 * mm
     paragraph(c, escape(pair["foods"]), FOODS, x + pad, ty, CARD_W - 2 * pad)
+    # receptor, anchored just above the footer
+    receptor = re.sub(r"K\+", "K<sup>+</sup>", escape(pair["receptor"]))
+    p = Paragraph(receptor, RECEPTOR)
+    _, ph = p.wrap(CARD_W - 2 * pad, 20 * mm)
+    p.drawOn(c, x + pad, y + 6.5 * mm)
+    label_y = y + 6.5 * mm + ph + 1.2 * mm
+    c.setStrokeColor(CUT)
+    c.setLineWidth(0.4)
+    c.line(x + 18 * mm, label_y + 3.6 * mm, x + CARD_W - 18 * mm, label_y + 3.6 * mm)
+    c.setFillColor(GREY)
+    c.setFont("Avenir-Demi", 5.5)
+    c.drawCentredString(x + CARD_W / 2, label_y, "RECEPTOR")
 
 
 def slot(i):
@@ -271,9 +319,12 @@ def make_answer_key(pairs, out):
     rows = [[Paragraph(h, head) for h in ("#", "Molecule", "Flavour card", "Found in",
                                            "Receptor", "Fun fact")]]
     for p in pairs:
-        rows.append([Paragraph(str(p["id"]), cell)] + [
-            Paragraph(escape(p[k]), bold if k in ("name", "flavour") else cell)
-            for k in ("name", "flavour", "foods", "receptor", "fact")])
+        name = escape(p["name"])
+        if "card_name" in p:
+            name += f'<br/><font name="Avenir" size="7" color="#6B6B6B">{escape(p["card_name"])}</font>'
+        rows.append([Paragraph(str(p["id"]), cell), Paragraph(name, bold)] + [
+            Paragraph(escape(p[k]), bold if k == "flavour" else cell)
+            for k in ("flavour", "foods", "receptor", "fact")])
     t = Table(rows, colWidths=[8 * mm, 45 * mm, 40 * mm, 45 * mm, 45 * mm, 90 * mm], repeatRows=1)
     t.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), MOL_COLOUR),
